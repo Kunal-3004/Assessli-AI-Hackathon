@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../GoogleDriveHelper.dart';
 import '../model/message.dart';
 import '../widgets/BuildMessage.dart';
@@ -386,7 +387,21 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             )
           ],
         ),
-        actions: [Icon(Icons.more_vert, color: Colors.white)],
+        actions: [
+          Builder(
+            builder: (ctx) => IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.white),
+              onPressed: () {
+                if (_popupEntry != null) {
+                  _popupEntry?.remove();
+                  _popupEntry = null;
+                } else {
+                  _showClassicPopupOverlay(ctx);
+                }
+              },
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -424,3 +439,81 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 }
+OverlayEntry? _popupEntry;
+
+void _showClassicPopupOverlay(BuildContext context) {
+  _popupEntry = OverlayEntry(
+    builder: (context) {
+      return Positioned(
+        top: kToolbarHeight + 5,
+        right: 12,
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 200,
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.account_circle, color: Colors.blueAccent),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'user@example.com',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Divider(color: Colors.grey.shade300),
+                GestureDetector(
+                  onTap: () async {
+                    _popupEntry?.remove();
+                    _popupEntry = null;
+
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChatScreen()),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: Colors.red),
+                      SizedBox(width: 10),
+                      Text("Log out", style: TextStyle(fontSize: 15)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  Overlay.of(context).insert(_popupEntry!);
+}
+
+
+
+
