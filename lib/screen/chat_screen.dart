@@ -9,6 +9,8 @@ import '../widgets/BuildOptionCard.dart';
 import '../widgets/MessageInput.dart';
 import '../widgets/TypingIndicator.dart';
 import '../widgets/appColors.dart';
+import 'Login.dart';
+import 'SignUp.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -121,8 +123,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        // _navigateToLogin();
+                        _navigateToLogin();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -135,8 +136,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        // _navigateToSignup();
+                        _navigateToSignup();
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
@@ -165,11 +165,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToLogin() {
-
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
   }
 
   void _navigateToSignup() {
-
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUpScreen()),
+    );
   }
 
   void _onTextChanged() {
@@ -220,6 +226,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
       backgroundColor: Colors.redAccent,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ));
   }
 
@@ -372,7 +380,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AI Assistant', style: TextStyle(color: Colors.white, fontSize: 18)),
+                Text('AGENT AI', style: TextStyle(color: Colors.white, fontSize: 18)),
                 Text('Online', style: TextStyle(color: Colors.greenAccent, fontSize: 12)),
               ],
             )
