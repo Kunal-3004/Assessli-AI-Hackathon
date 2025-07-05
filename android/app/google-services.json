@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "319570273346",
+    "project_id": "agent-ai-ce692",
+    "storage_bucket": "agent-ai-ce692.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319570273346:android:44e5fcbfa3ac8d6cd1f9db",
+        "android_client_info": {
+          "package_name": "com.example.agent_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNDuUyYBVXWgWnToDqArbcVuG99IteD-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
