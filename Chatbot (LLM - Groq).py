@@ -549,8 +549,8 @@ class AgenticRAG:
           return self.vectorstore.similarity_search(query, k=k)
 
           
-      def retrieve_analytical(self, query: str, k: int = 4) -> List[Document]:
-        print("Retrieving Analytical Documents...")
+    def retrieve_analytical(self, query: str, k: int = 4) -> List[Document]:
+      print("Retrieving Analytical Documents...")
 
       try:
           sub_queries_prompt = PromptTemplate(
@@ -594,8 +594,8 @@ class AgenticRAG:
 
 
 
-      def retrieve_opinion(self, query: str, k: int = 3) -> List[Document]:
-        print("Retrieving Opinion-based Documents...")
+    def retrieve_opinion(self, query: str, k: int = 3) -> List[Document]:
+      print("Retrieving Opinion-based Documents...")
 
       try:
           opinion_prompt = PromptTemplate(
@@ -609,7 +609,7 @@ class AgenticRAG:
           all_chunks = []
           for vp in viewpoints:
               try:
-                  enriched_chunks = retrieve_with_context_overlap(
+                  enriched_chunks = self.retrieve_with_context_overlap(
                       self.vectorstore,
                       self.retriever,
                       f"{query} {vp}",
@@ -621,7 +621,7 @@ class AgenticRAG:
                   fallback_docs = self.vectorstore.similarity_search(f"{query} {vp}", k=2)
                   all_chunks.extend([doc.page_content for doc in fallback_docs])
 
-          all_docs = wrap_chunks_with_documents(all_chunks)
+          all_docs = self.wrap_chunks_with_documents(all_chunks)
 
           docs_text = "\n".join([f"{i}: {doc.page_content[:100]}..." for i, doc in enumerate(all_docs)])
 
@@ -644,8 +644,8 @@ class AgenticRAG:
           return self.vectorstore.similarity_search(query, k=k)
 
         
-      def retrieve_contextual(self, query: str, k: int = 4, user_context: str = None) -> List[Document]:
-        print("Retrieving Contextual Documents...")
+    def retrieve_contextual(self, query: str, k: int = 4, user_context: str = None) -> List[Document]:
+      print("Retrieving Contextual Documents...")
 
       try:
           context_str = user_context or "No specific context provided"
@@ -661,13 +661,13 @@ class AgenticRAG:
           print(f"Contextualized Query: {contextualized_query}")
 
           try:
-              enriched_chunks = retrieve_with_context_overlap(
+              enriched_chunks = self.retrieve_with_context_overlap(
                   self.vectorstore,
                   self.retriever,
                   contextualized_query,
                   num_neighbors=1
               )
-              all_docs = wrap_chunks_with_documents(enriched_chunks)
+              all_docs = self.wrap_chunks_with_documents(enriched_chunks)
 
               contextual_rank_prompt = PromptTemplate(
                   input_variables=["query", "context", "doc"],
@@ -725,328 +725,328 @@ class AgenticRAG:
           return self.vectorstore.similarity_search(query, k=k)
 
       
-      def duckduckgo_search(self, query, max_results=3):
-          """DuckDuckGo search with error handling"""
-          try:
-              print(f"🔍 Searching web for: {query}")
-              time.sleep(1)
-              with DDGS() as ddgs:
-                  results = ddgs.text(query, max_results=max_results)
-                  docs = []
-                  for r in results:
-                      if 'body' in r:
-                          docs.append(Document(page_content=r['body'], metadata={"source": r['href']}))
-                          if len(docs) >= max_results:
-                              break
-                  print(f"Found {len(docs)} web results")
-                  return docs
-          except Exception as e:
-              print(f"Web search failed: {str(e)}")
-              return []
+    def duckduckgo_search(self, query, max_results=3):
+        """DuckDuckGo search with error handling"""
+        try:
+            print(f"🔍 Searching web for: {query}")
+            time.sleep(1)
+            with DDGS() as ddgs:
+                results = ddgs.text(query, max_results=max_results)
+                docs = []
+                for r in results:
+                    if 'body' in r:
+                        docs.append(Document(page_content=r['body'], metadata={"source": r['href']}))
+                        if len(docs) >= max_results:
+                            break
+                print(f"Found {len(docs)} web results")
+                return docs
+        except Exception as e:
+            print(f"Web search failed: {str(e)}")
+            return []
       
-      def safe_retrieve(self, state):
-          """Safe document retrieval"""
-          try:
-              question = state["question"]
-              session_id = state.get("session_id", "default")
-              
-              print(f"Retrieving documents for: {question}")
-              self.state_manager.update_state(session_id, ProcessingState.RETRIEVING)
-              
-              documents = self.retriever.invoke(question)
-              
-              if not documents:
-                  print("No documents found, will trigger search fallback")
-                  return {"documents": [], "question": question, "session_id": session_id, 
-                        "error_message": "No documents found for your query."}
-              
-              print(f"Retrieved {len(documents)} documents")
-              return {"documents": documents, "question": question, "session_id": session_id}
-              
-          except Exception as e:
-              print(f"Retrieval failed: {str(e)}")
-              session_id = state.get("session_id", "default")
-              error = SystemError(
-                  error_type=ErrorType.RETRIEVAL_ERROR,
-                  message=str(e),
-                  timestamp=datetime.now(),
-                  node="retrieve"
-              )
-              self.state_manager.log_error(session_id, error)
-              
-              return {"documents": [], "question": state["question"], "session_id": session_id,
-                    "error_message": "I'm having trouble finding relevant information. Let me try a different approach."}
+    def safe_retrieve(self, state):
+        """Safe document retrieval"""
+        try:
+            question = state["question"]
+            session_id = state.get("session_id", "default")
+            
+            print(f"Retrieving documents for: {question}")
+            self.state_manager.update_state(session_id, ProcessingState.RETRIEVING)
+            
+            documents = self.retriever.invoke(question)
+            
+            if not documents:
+                print("No documents found, will trigger search fallback")
+                return {"documents": [], "question": question, "session_id": session_id, 
+                    "error_message": "No documents found for your query."}
+            
+            print(f"Retrieved {len(documents)} documents")
+            return {"documents": documents, "question": question, "session_id": session_id}
+            
+        except Exception as e:
+            print(f"Retrieval failed: {str(e)}")
+            session_id = state.get("session_id", "default")
+            error = SystemError(
+                error_type=ErrorType.RETRIEVAL_ERROR,
+                message=str(e),
+                timestamp=datetime.now(),
+                node="retrieve"
+            )
+            self.state_manager.log_error(session_id, error)
+            
+            return {"documents": [], "question": state["question"], "session_id": session_id,
+                "error_message": "I'm having trouble finding relevant information. Let me try a different approach."}
     
-      def safe_grade_documents(self, state):
-          """Safe document grading"""
-          try:
-              question = state["question"]
-              documents = state["documents"]
-              session_id = state.get("session_id", "default")
-              
-              print(f"Grading {len(documents)} documents")
-              self.state_manager.update_state(session_id, ProcessingState.GRADING)
-              
-              if not documents:
-                  print("No documents found, trying web search")
-                  search_docs = self.duckduckgo_search(question)
-                  if search_docs:
-                      print(f"Web search found {len(search_docs)} documents")
-                      return {"documents": search_docs, "question": question, "session_id": session_id}
-                  else:
-                      print("Web search also failed")
-                      return {"documents": [], "question": question, "session_id": session_id,
-                            "error_message": "I couldn't find relevant information for your question."}
-              
-              filtered_docs = []
-              for i, d in enumerate(documents):
-                  try:
-                      score = self.retrieval_grader.invoke(
-                          {"question": question, "document": d.page_content}
-                      )
-                      if score.binary_score == "yes":
-                          filtered_docs.append(d)
-                          print(f"Document {i+1} is relevant")
-                      else:
-                          print(f"Document {i+1} is not relevant")
-                  except Exception as e:
-                      print(f"Failed to grade document {i+1}: {str(e)}")
-                      filtered_docs.append(d)
-              
-              if not filtered_docs:
-                  print("🔍 No relevant docs found, trying web search")
-                  search_docs = self.duckduckgo_search(question)
-                  filtered_docs = search_docs if search_docs else documents[:2]  
-              
-              print(f"Final document count: {len(filtered_docs)}")
-              return {"documents": filtered_docs, "question": question, "session_id": session_id}
-              
-          except Exception as e:
-              print(f"Document grading failed: {str(e)}")
-              session_id = state.get("session_id", "default")
-              error = SystemError(
-                  error_type=ErrorType.GRADING_ERROR,
-                  message=str(e),
-                  timestamp=datetime.now(),
-                  node="grade_documents"
-              )
-              self.state_manager.log_error(session_id, error)
-              
-              return {"documents": state.get("documents", []), "question": question, "session_id": session_id}
+    def safe_grade_documents(self, state):
+        """Safe document grading"""
+        try:
+            question = state["question"]
+            documents = state["documents"]
+            session_id = state.get("session_id", "default")
+            
+            print(f"Grading {len(documents)} documents")
+            self.state_manager.update_state(session_id, ProcessingState.GRADING)
+            
+            if not documents:
+                print("No documents found, trying web search")
+                search_docs = self.duckduckgo_search(question)
+                if search_docs:
+                    print(f"Web search found {len(search_docs)} documents")
+                    return {"documents": search_docs, "question": question, "session_id": session_id}
+                else:
+                    print("Web search also failed")
+                    return {"documents": [], "question": question, "session_id": session_id,
+                        "error_message": "I couldn't find relevant information for your question."}
+            
+            filtered_docs = []
+            for i, d in enumerate(documents):
+                try:
+                    score = self.retrieval_grader.invoke(
+                        {"question": question, "document": d.page_content}
+                    )
+                    if score.binary_score == "yes":
+                        filtered_docs.append(d)
+                        print(f"Document {i+1} is relevant")
+                    else:
+                        print(f"Document {i+1} is not relevant")
+                except Exception as e:
+                    print(f"Failed to grade document {i+1}: {str(e)}")
+                    filtered_docs.append(d)
+            
+            if not filtered_docs:
+                print("🔍 No relevant docs found, trying web search")
+                search_docs = self.duckduckgo_search(question)
+                filtered_docs = search_docs if search_docs else documents[:2]  
+            
+            print(f"Final document count: {len(filtered_docs)}")
+            return {"documents": filtered_docs, "question": question, "session_id": session_id}
+            
+        except Exception as e:
+            print(f"Document grading failed: {str(e)}")
+            session_id = state.get("session_id", "default")
+            error = SystemError(
+                error_type=ErrorType.GRADING_ERROR,
+                message=str(e),
+                timestamp=datetime.now(),
+                node="grade_documents"
+            )
+            self.state_manager.log_error(session_id, error)
+            
+            return {"documents": state.get("documents", []), "question": question, "session_id": session_id}
       
-      def safe_generate(self, state):
-          """Safe response generation"""
-          try:
-              question = state["question"]
-              documents = state["documents"]
-              session_id = state.get("session_id", "default")
-              
-              print(f"Generating response using {len(documents)} documents")
-              self.state_manager.update_state(session_id, ProcessingState.GENERATING)
-              
-              if not documents:
-                  print("No documents available for generation")
-                  return {"documents": documents, "question": question, "session_id": session_id,
-                        "generation": "I apologize, but I don't have enough information to answer your question properly. Could you please rephrase your question or provide more context?"}
-              
-              try:
-                  prompt = hub.pull("rlm/rag-prompt")
-                  rag_chain = prompt | self.llm | StrOutputParser()
-                  
-                  generation = rag_chain.invoke({"context": documents, "question": question})
-                  
-                  if not generation or len(generation.strip()) < 10:
-                      generation = "I found some relevant information but couldn't generate a complete response. Could you please ask your question in a different way?"
-                  
-                  print(f"Generated response: {generation[:100]}...")
-                  return {"documents": documents, "question": question, "generation": generation, "session_id": session_id}
-                  
-              except Exception as e:
-                  print(f"RAG chain failed: {str(e)}")
-                  context_text = "\n".join([doc.page_content for doc in documents[:3]])
-                  simple_prompt = f"Based on this context: {context_text}\n\nAnswer this question: {question}"
-                  
-                  try:
-                      generation = self.llm.invoke(simple_prompt).content
-                      print(f"Fallback generation successful")
-                      return {"documents": documents, "question": question, "generation": generation, "session_id": session_id}
-                  except Exception as e2:
-                      print(f"Fallback generation also failed: {str(e2)}")
-                      raise e2
-              
-          except Exception as e:
-              print(f"Generation completely failed: {str(e)}")
-              session_id = state.get("session_id", "default")
-              error = SystemError(
-                  error_type=ErrorType.GENERATION_ERROR,
-                  message=str(e),
-                  timestamp=datetime.now(),
-                  node="generate"
-              )
-              self.state_manager.log_error(session_id, error)
-              
-              fallback_response = "I'm experiencing some technical difficulties generating a response. Please try asking your question again, or rephrase it for better results."
-              return {"documents": state.get("documents", []), "question": question, 
-                    "generation": fallback_response, "session_id": session_id}
+    def safe_generate(self, state):
+        """Safe response generation"""
+        try:
+            question = state["question"]
+            documents = state["documents"]
+            session_id = state.get("session_id", "default")
+            
+            print(f"Generating response using {len(documents)} documents")
+            self.state_manager.update_state(session_id, ProcessingState.GENERATING)
+            
+            if not documents:
+                print("No documents available for generation")
+                return {"documents": documents, "question": question, "session_id": session_id,
+                    "generation": "I apologize, but I don't have enough information to answer your question properly. Could you please rephrase your question or provide more context?"}
+            
+            try:
+                prompt = hub.pull("rlm/rag-prompt")
+                rag_chain = prompt | self.llm | StrOutputParser()
+                
+                generation = rag_chain.invoke({"context": documents, "question": question})
+                
+                if not generation or len(generation.strip()) < 10:
+                    generation = "I found some relevant information but couldn't generate a complete response. Could you please ask your question in a different way?"
+                
+                print(f"Generated response: {generation[:100]}...")
+                return {"documents": documents, "question": question, "generation": generation, "session_id": session_id}
+                
+            except Exception as e:
+                print(f"RAG chain failed: {str(e)}")
+                context_text = "\n".join([doc.page_content for doc in documents[:3]])
+                simple_prompt = f"Based on this context: {context_text}\n\nAnswer this question: {question}"
+                
+                try:
+                    generation = self.llm.invoke(simple_prompt).content
+                    print(f"Fallback generation successful")
+                    return {"documents": documents, "question": question, "generation": generation, "session_id": session_id}
+                except Exception as e2:
+                    print(f"Fallback generation also failed: {str(e2)}")
+                    raise e2
+            
+        except Exception as e:
+            print(f"Generation completely failed: {str(e)}")
+            session_id = state.get("session_id", "default")
+            error = SystemError(
+                error_type=ErrorType.GENERATION_ERROR,
+                message=str(e),
+                timestamp=datetime.now(),
+                node="generate"
+            )
+            self.state_manager.log_error(session_id, error)
+            
+            fallback_response = "I'm experiencing some technical difficulties generating a response. Please try asking your question again, or rephrase it for better results."
+            return {"documents": state.get("documents", []), "question": question, 
+                "generation": fallback_response, "session_id": session_id}
     
-      def safe_transform_query(self, state):
-          """Safe query transformation"""
-          try:
-              question = state["question"]
-              session_id = state.get("session_id", "default")
-              
-              print(f"Transforming query: {question}")
-              self.state_manager.update_state(session_id, ProcessingState.TRANSFORMING)
-              
-              better_question = self.question_rewriter.invoke({"question": question})
-              
-              if not better_question or len(better_question.strip()) < 5:
-                  better_question = question  
-              
-              print(f"Transformed query: {better_question}")
-              return {"documents": state.get("documents", []), "question": better_question, "session_id": session_id}
-              
-          except Exception as e:
-              print(f"Query transformation failed: {str(e)}")
-              session_id = state.get("session_id", "default")
-              error = SystemError(
-                  error_type=ErrorType.SYSTEM_ERROR,
-                  message=str(e),
-                  timestamp=datetime.now(),
-                  node="transform_query"
-              )
-              self.state_manager.log_error(session_id, error)
-              
-              return {"documents": state.get("documents", []), "question": question, "session_id": session_id}
+    def safe_transform_query(self, state):
+        """Safe query transformation"""
+        try:
+            question = state["question"]
+            session_id = state.get("session_id", "default")
+            
+            print(f"Transforming query: {question}")
+            self.state_manager.update_state(session_id, ProcessingState.TRANSFORMING)
+            
+            better_question = self.question_rewriter.invoke({"question": question})
+            
+            if not better_question or len(better_question.strip()) < 5:
+                better_question = question  
+            
+            print(f"Transformed query: {better_question}")
+            return {"documents": state.get("documents", []), "question": better_question, "session_id": session_id}
+            
+        except Exception as e:
+            print(f"Query transformation failed: {str(e)}")
+            session_id = state.get("session_id", "default")
+            error = SystemError(
+                error_type=ErrorType.SYSTEM_ERROR,
+                message=str(e),
+                timestamp=datetime.now(),
+                node="transform_query"
+            )
+            self.state_manager.log_error(session_id, error)
+            
+            return {"documents": state.get("documents", []), "question": question, "session_id": session_id}
       
-      def decide_to_generate(self, state):
-          """Decide whether to generate or transform query"""
-          documents = state.get("documents", [])
-          
-          if not documents:
-              print("No documents found, will transform query")
-              return "transform_query"
-          else:
-              print("Documents found, proceeding to generate")
-              return "generate"
+    def decide_to_generate(self, state):
+        """Decide whether to generate or transform query"""
+        documents = state.get("documents", [])
+        
+        if not documents:
+            print("No documents found, will transform query")
+            return "transform_query"
+        else:
+            print("Documents found, proceeding to generate")
+            return "generate"
       
-      def grade_generation_v_documents_and_question(self, state):
-          """Grade generation quality"""
-          try:
-              question = state["question"]
-              documents = state["documents"]
-              generation = state["generation"]
-              session_id = state.get("session_id", "default")
-              
-              print("Grading generation quality")
-              
-              if "technical difficulties" in generation.lower() or "apologize" in generation.lower():
-                  print("Generation contains error messages")
-                  return "not useful"
-              
-              try:
-                  score = self.hallucination_grader.invoke(
-                      {"documents": documents, "generation": generation}
-                  )
-                  if score.binary_score == "no":
-                      print("Generation not supported by documents")
-                      return "not supported"
-                  else:
-                      print("Generation is supported by documents")
-              except Exception as e:
-                  print(f"Hallucination grading failed: {str(e)}")
-                  pass 
-              
-              try:
-                  score = self.answer_grader.invoke({"question": question, "generation": generation})
-                  if score.binary_score == "no":
-                      print("Generation doesn't address the question")
-                      return "not useful"
-                  else:
-                      print("Generation addresses the question")
-              except Exception as e:
-                  print(f"Answer grading failed: {str(e)}")
-                  pass  
-              
-              print("Generation is useful")
-              self.state_manager.reset_failures(session_id)
-              return "useful"
-              
-          except Exception as e:
-              print(f"Generation grading failed: {str(e)}")
-              return "useful"  
+    def grade_generation_v_documents_and_question(self, state):
+        """Grade generation quality"""
+        try:
+            question = state["question"]
+            documents = state["documents"]
+            generation = state["generation"]
+            session_id = state.get("session_id", "default")
+            
+            print("Grading generation quality")
+            
+            if "technical difficulties" in generation.lower() or "apologize" in generation.lower():
+                print("Generation contains error messages")
+                return "not useful"
+            
+            try:
+                score = self.hallucination_grader.invoke(
+                    {"documents": documents, "generation": generation}
+                )
+                if score.binary_score == "no":
+                    print("Generation not supported by documents")
+                    return "not supported"
+                else:
+                    print("Generation is supported by documents")
+            except Exception as e:
+                print(f"Hallucination grading failed: {str(e)}")
+                pass 
+            
+            try:
+                score = self.answer_grader.invoke({"question": question, "generation": generation})
+                if score.binary_score == "no":
+                    print("Generation doesn't address the question")
+                    return "not useful"
+                else:
+                    print("Generation addresses the question")
+            except Exception as e:
+                print(f"Answer grading failed: {str(e)}")
+                pass  
+            
+            print("Generation is useful")
+            self.state_manager.reset_failures(session_id)
+            return "useful"
+            
+        except Exception as e:
+            print(f"Generation grading failed: {str(e)}")
+            return "useful"  
       
-      def generate_response(self, question: str, session_id: str = "default") -> str:
-          """Generate response with comprehensive error handling"""
-          try:
-              print(f"Starting response generation for: {question}")
-              
-             
-              self.state_manager.initialize_session(session_id)
-              
-              if not question or len(question.strip()) < 3:
-                  print("Question too short")
-                  return "Please provide a more specific question so I can help you better."
-              
-              health = self.state_manager.get_session_health(session_id)
-              if not health['healthy']:
-                  print("Session unhealthy")
-                  return "I'm experiencing some issues. Please try starting a new conversation."
-              
-              inputs = {"question": question, "session_id": session_id}
-              
-              try:
-                  print("Running workflow...")
-                  final_output = None
-                  step_count = 0
-                  
-                  for output in self.app.stream(inputs):
-                      step_count += 1
-                      print(f"Step {step_count}: {list(output.keys())}")
-                      
-                      for key, value in output.items():
-                          if key == "generate":
-                              final_output = value
-                              print(f"Found final output in step {step_count}")
-                              break
-                      
-                      if final_output:
-                          break
-                      
-                      if step_count > 10:
-                          print("Too many workflow steps, breaking")
-                          break
-                  
-                  if final_output and "generation" in final_output:
-                      response = final_output["generation"]
-                      
-                      if len(response.strip()) < 10:
-                          print("Response too short")
-                          return "I found some information but couldn't provide a complete answer. Could you please rephrase your question?"
-                      
-                      print("Response generation successful")
-                      self.state_manager.update_state(session_id, ProcessingState.COMPLETED)
-                      return response
-                  else:
-                      print("No generation found in workflow output")
-                      return "I'm having trouble processing your question right now. Please try rephrasing it or ask something else."
-                      
-              except Exception as e:
-                  print(f"Workflow execution failed: {str(e)}")
-                  print(f"Workflow traceback: {traceback.format_exc()}")
-                  
-                  if self.state_manager.should_retry(session_id, ErrorType.SYSTEM_ERROR):
-                      print("Retrying...")
-                      self.state_manager.increment_retry(session_id)
-                      return "Let me try that again... " + self.generate_response(question, session_id)
-                  else:
-                      print("Max retries reached")
-                      return "I'm having trouble answering your question. Please try asking something else or rephrase your question."
-          
-          except Exception as e:
-              print(f"Complete failure in generate_response: {str(e)}")
-              print(f"Complete traceback: {traceback.format_exc()}")
-              return "I'm experiencing technical difficulties. Please try your question again."
+    def generate_response(self, question: str, session_id: str = "default") -> str:
+        """Generate response with comprehensive error handling"""
+        try:
+            print(f"Starting response generation for: {question}")
+            
+            
+            self.state_manager.initialize_session(session_id)
+            
+            if not question or len(question.strip()) < 3:
+                print("Question too short")
+                return "Please provide a more specific question so I can help you better."
+            
+            health = self.state_manager.get_session_health(session_id)
+            if not health['healthy']:
+                print("Session unhealthy")
+                return "I'm experiencing some issues. Please try starting a new conversation."
+            
+            inputs = {"question": question, "session_id": session_id}
+            
+            try:
+                print("Running workflow...")
+                final_output = None
+                step_count = 0
+                
+                for output in self.app.stream(inputs):
+                    step_count += 1
+                    print(f"Step {step_count}: {list(output.keys())}")
+                    
+                    for key, value in output.items():
+                        if key == "generate":
+                            final_output = value
+                            print(f"Found final output in step {step_count}")
+                            break
+                    
+                    if final_output:
+                        break
+                    
+                    if step_count > 10:
+                        print("Too many workflow steps, breaking")
+                        break
+                
+                if final_output and "generation" in final_output:
+                    response = final_output["generation"]
+                    
+                    if len(response.strip()) < 10:
+                        print("Response too short")
+                        return "I found some information but couldn't provide a complete answer. Could you please rephrase your question?"
+                    
+                    print("Response generation successful")
+                    self.state_manager.update_state(session_id, ProcessingState.COMPLETED)
+                    return response
+                else:
+                    print("No generation found in workflow output")
+                    return "I'm having trouble processing your question right now. Please try rephrasing it or ask something else."
+                    
+            except Exception as e:
+                print(f"Workflow execution failed: {str(e)}")
+                print(f"Workflow traceback: {traceback.format_exc()}")
+                
+                if self.state_manager.should_retry(session_id, ErrorType.SYSTEM_ERROR):
+                    print("Retrying...")
+                    self.state_manager.increment_retry(session_id)
+                    return "Let me try that again... " + self.generate_response(question, session_id)
+                else:
+                    print("Max retries reached")
+                    return "I'm having trouble answering your question. Please try asking something else or rephrase your question."
+        
+        except Exception as e:
+            print(f"Complete failure in generate_response: {str(e)}")
+            print(f"Complete traceback: {traceback.format_exc()}")
+            return "I'm experiencing technical difficulties. Please try your question again."
 
 
 try:
@@ -1099,7 +1099,7 @@ except Exception as e:
     def ask_question(question: str, session_id: str = "default") -> str:
         return rag_system.generate_response(question, session_id)
     
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -1115,5 +1115,5 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if _name_ == '_main_':
+if __name__ == '_main_':
     app.run(host='0.0.0.0', port=5001, debug=True)
