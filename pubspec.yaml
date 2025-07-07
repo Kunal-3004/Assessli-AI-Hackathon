@@ -40,6 +40,11 @@ dependencies:
   googleapis_auth:
   http:
   shared_preferences:
+  dio:
+  lottie:
+  speech_to_text:
+  deepgram_speech_to_text:
+  audioplayers:
   flutter:
     sdk: flutter
 
