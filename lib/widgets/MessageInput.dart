@@ -71,19 +71,19 @@ class MessageInputBar extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onAttachTap,
-            child: Container(
-              width: 50,
-              height: 50,
-              margin: const EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: AppColors.botGradient),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: onAttachTap,
+          //   child: Container(
+          //     width: 50,
+          //     height: 50,
+          //     margin: const EdgeInsets.only(left: 8),
+          //     decoration: BoxDecoration(
+          //       gradient: LinearGradient(colors: AppColors.botGradient),
+          //       shape: BoxShape.circle,
+          //     ),
+          //     child: const Icon(Icons.add, color: Colors.white),
+          //   ),
+          // ),
         ],
       ),
     );
