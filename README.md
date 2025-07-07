@@ -14,7 +14,7 @@ These upgrades ensure high-quality results by adapting to the user’s intent an
 
 ## 📊 Overall System Architecture
 
-![Pipeline](pipeline.png)
+![Pipeline](pipeline.jpg)
 
 
 ---
