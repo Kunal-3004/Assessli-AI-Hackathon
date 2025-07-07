@@ -1,10 +1,49 @@
 import 'dart:ui';
+import 'package:agent_ai/screen/chat_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
 import 'SignUp.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final email = userCredential.user?.email ?? 'Unknown';
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userEmail', email);
+
+      // Navigate to chat
+      Navigator.pushReplacement(
+        navigatorKey.currentContext!,
+        MaterialPageRoute(builder: (_) => ChatScreen()),
+      );
+    } catch (e) {
+      debugPrint("Google sign-in failed: $e");
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Google sign-in failed'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +136,27 @@ class LoginScreen extends StatelessWidget {
                         Divider(height: 32, color: Colors.white30),
                         Text("OR", style: TextStyle(color: Colors.white54)),
                         const SizedBox(height: 16),
-                        _buildSocialButton(Icons.g_mobiledata, "Continue with Google"),
+                        _buildSocialButton(Icons.g_mobiledata, "Continue with Google", _handleGoogleSignIn),
                         const SizedBox(height: 12),
-                        _buildSocialButton(Icons.window, "Continue with Microsoft Account"),
+                        _buildSocialButton(Icons.window, "Continue with Microsoft Account", () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text("Microsoft login coming soon"),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ));
+                        }),
                         const SizedBox(height: 12),
-                        _buildSocialButton(Icons.apple, "Continue with Apple"),
+                        _buildSocialButton(Icons.apple, "Continue with Apple", () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text("Apple login coming soon"),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ));
+                        }),
                         const SizedBox(height: 24),
                         Text.rich(
                           TextSpan(
@@ -139,9 +194,9 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton(IconData icon, String text) {
+  Widget _buildSocialButton(IconData icon, String text, VoidCallback onPressed) {
     return OutlinedButton.icon(
-      onPressed: () {},
+      onPressed: onPressed,
       icon: Icon(icon, size: 20, color: Colors.white),
       label: Text(text),
       style: OutlinedButton.styleFrom(
@@ -152,4 +207,5 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
 }
