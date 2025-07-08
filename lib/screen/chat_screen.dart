@@ -511,7 +511,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     try {
       print("Generating response for: '$msg'");
       final response = await _dio.post(
-        'http://10.233.159.48:5002/chat',
+        'http://127.0.0.1:5000/chat',
         data: jsonEncode({'input': msg, 'session_id': sessionId}),
         options: Options(
           contentType: Headers.jsonContentType,
