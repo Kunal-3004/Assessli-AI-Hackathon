@@ -25,13 +25,12 @@ class LoginScreen extends StatelessWidget {
 
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-      final email = userCredential.user?.email ?? 'Unknown';
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('userEmail', email);
 
-      // Navigate to chat
+
+
       Navigator.pushReplacement(
         navigatorKey.currentContext!,
         MaterialPageRoute(builder: (_) => ChatScreen()),

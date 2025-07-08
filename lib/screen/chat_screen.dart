@@ -5,12 +5,14 @@ import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:deepgram_speech_to_text/deepgram_speech_to_text.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../GoogleDriveHelper.dart';
+import '../main.dart';
 import '../model/message.dart';
 import '../widgets/BuildMessage.dart';
 import '../widgets/BuildOptionCard.dart';
@@ -31,6 +33,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
   bool _hasText = false;
+  OverlayEntry? _popupEntry;
 
   late AnimationController _typingAnimationController;
   late Animation<double> _typingAnimation;
@@ -68,9 +71,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      _showWelcomeDialog(context);
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   final currentUser = FirebaseAuth.instance.currentUser;
+    //   if (currentUser == null) {
+    //     final prefs = await SharedPreferences.getInstance();
+    //     final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+    //     if (!isLoggedIn) {
+    //       _showWelcomeDialog(context);
+    //     }
+    //   }
+    // });
+
 
     _speechToText = SpeechToText();
     _speechEnabled = false;
@@ -104,6 +115,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         timestamp: DateTime.now(),
       ),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        final prefs = await SharedPreferences.getInstance();
+        final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+        if (!isLoggedIn) {
+          _showWelcomeDialog(context);
+        }
+      }
+    });
   }
 
   @override
@@ -511,7 +533,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     try {
       print("Generating response for: '$msg'");
       final response = await _dio.post(
-        'http://10.233.159.48:5002/chat',
+        'http://172.22.121.7:5001/chat',
         data: jsonEncode({'input': msg, 'session_id': sessionId}),
         options: Options(
           contentType: Headers.jsonContentType,
@@ -552,6 +574,103 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         );
       }
     });
+  }
+
+  void _showClassicPopupOverlay(BuildContext context,VoidCallback clearChat) {
+    _popupEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          top: kToolbarHeight + 5,
+          right: 12,
+          child: Material(
+            elevation: 10,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 200,
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.account_circle, color: Colors.blueAccent),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          FirebaseAuth.instance.currentUser?.email ?? 'Guest',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Divider(color: Colors.grey.shade300),
+                  GestureDetector(
+                    onTap: () async {
+                      _popupEntry?.remove();
+                      _popupEntry = null;
+                      clearChat();
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.chat_bubble_outline, color: Colors.grey.shade800),
+                        SizedBox(width: 10),
+                        Text("New Chat", style: TextStyle(fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () async {
+                      _popupEntry?.remove();
+                      _popupEntry = null;
+
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+                      await FirebaseAuth.instance.signOut();
+
+                      // final navigatorContext = navigatorKey.currentContext;
+                      //
+                      // if (navigatorContext != null) {
+                      //   Navigator.pushReplacement(
+                      //     navigatorContext,
+                      //     MaterialPageRoute(builder: (_) => ChatScreen()),
+                      //   );
+                      // }
+                      if (mounted) {
+                        _showWelcomeDialog(this.context);
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.red),
+                        SizedBox(width: 10),
+                        Text("Log out", style: TextStyle(fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(context).insert(_popupEntry!);
   }
 
   @override
@@ -612,7 +731,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     itemBuilder: (context, index) {
                       if (_isTyping && index == _messages.length) {
                         return TypingIndicator(animation: _typingAnimation);
-        
+
                       }
                       return ChatBubble(message: _messages[index]);
                     },
@@ -635,93 +754,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 }
-OverlayEntry? _popupEntry;
 
-void _showClassicPopupOverlay(BuildContext context,VoidCallback clearChat) {
-  _popupEntry = OverlayEntry(
-    builder: (context) {
-      return Positioned(
-        top: kToolbarHeight + 5,
-        right: 12,
-        child: Material(
-          elevation: 10,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 200,
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  offset: Offset(2, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.account_circle, color: Colors.blueAccent),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'user@example.com',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Divider(color: Colors.grey.shade300),
-                GestureDetector(
-                  onTap: () async {
-                    clearChat();
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.chat_bubble_outline, color: Colors.grey.shade800),
-                      SizedBox(width: 10),
-                      Text("New Chat", style: TextStyle(fontSize: 15)),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () async {
-                    _popupEntry?.remove();
-                    _popupEntry = null;
 
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.clear();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => ChatScreen()),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 10),
-                      Text("Log out", style: TextStyle(fontSize: 15)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
 
-  Overlay.of(context).insert(_popupEntry!);
-}
 
 
 
