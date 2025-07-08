@@ -1,3 +1,4 @@
+
 # Assessli Agentic AI Chatbot 🤖
 
 ## 🚀 Project Overview
@@ -15,7 +16,6 @@ These upgrades ensure high-quality results by adapting to the user’s intent an
 ## 📊 Overall System Architecture
 
 ![Pipeline](pipeline.jpg)
-
 
 ---
 
@@ -75,19 +75,72 @@ Preserves context across interactions to ensure coherent, personalized responses
 
 ---
 
+## 🛠️ Setup Instructions
+
+### 🔐 API Keys Setup 
+
+- **Groq API Key**:  
+  Get a free key from [https://console.groq.com/keys](https://console.groq.com/keys)  
+
+
+- **Deepgram API Key**:  
+  Get a free key from [https://console.deepgram.com/signup](https://console.deepgram.com/signup)  
+
+
+---
+
+### 📱 Flutter Frontend Setup
+
+> 🖥️ Run these commands in your **terminal (bash/cmd)**
+
+```bash
+# 1. Clone the Repository
+git clone https://github.com/Kunal-3004/Assessli-AI-Hackathon.git
+
+# 2. Navigate to Project Directory
+cd Assessli-AI-Hackathon
+
+# 3. Install Flutter Dependencies
+flutter pub get
+
+# 4. Run the Flutter App
+flutter run
+```
+
+---
+
+### 🐳 Backend Setup (Flask + Docker)
+
+> 🖥️ Run these commands in your **terminal inside the cloned folder**
+
+```bash
+# 1. Navigate to Backend Code
+cd Chatbot
+
+# 2. Build the Docker Image
+docker build -t flask-agentic .
+
+# 3. Run the Docker Container (Exposes port 5000)
+docker run -p 5000:5000 flask-agentic
+```
+
+> ✅ After running, the Flask backend should be available at `http://localhost:5000`
+
+---
+
 ## 📚 References
 
-- [Adaptive Retrieval - Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/adaptive_retrieval.ipynb)
+- [Adaptive Retrieval - Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/adaptive_retrieval.ipynb)  
 - [Context Enrichment Window - Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/context_enrichment_window_around_chunk.ipynb)
 
 ---
 
 ## 💡 Key Features
 
-- Modular and scalable architecture
-- Intelligent query classification and enrichment
-- Feedback loop for reliability
-- Real-time query rewriting
+- Modular and scalable architecture  
+- Intelligent query classification and enrichment  
+- Feedback loop for reliability  
+- Real-time query rewriting  
 - Seamless exception handling
 
 ---
@@ -95,6 +148,3 @@ Preserves context across interactions to ensure coherent, personalized responses
 ## 👨‍💻 Team
 
 **Team Tridents** – IIT ISM Dhanbad
-
----
-
