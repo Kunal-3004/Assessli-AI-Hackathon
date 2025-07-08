@@ -1,0 +1,14 @@
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langgraph
+sentence-transformers
+faiss-cpu
+duckduckgo-search
+flask
+pydantic
+typing-extensions
+Pillow
+transformers
+torch
