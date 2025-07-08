@@ -155,7 +155,7 @@ class AgenticRAG:
     def setup_system(self):
         try:
             
-            os.environ["GROQ_API_KEY"] = "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"
+            os.environ["GROQ_API_KEY"] = "YOUR_GROQ_API_KEY"
 
             self.llm = ChatGroq(model_name="llama-3.1-8b-instant", temperature=0)
 
