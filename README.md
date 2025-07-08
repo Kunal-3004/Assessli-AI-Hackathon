@@ -118,13 +118,13 @@ flutter run
 cd Chatbot
 
 # 2. Build the Docker Image
-docker build -t flask-agentic .
+docker build -t Chatbot .
 
 # 3. Run the Docker Container (Exposes port 5000)
-docker run -p 5000:5000 flask-agentic
+docker run -p 5000:5000 Chatbot
 ```
 
-> ✅ After running, the Flask backend should be available at `http://localhost:5000`
+> ✅ After running, the Flask backend should be available at `http://localhost:5000/chat`
 
 ---
 
