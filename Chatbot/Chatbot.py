@@ -8,7 +8,6 @@ import time
 from contextlib import contextmanager
 
 from langchain_groq import ChatGroq
-from langchain_openai import OpenAIEmbeddings
 from langchain.document_loaders import WebBaseLoader, PyPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
