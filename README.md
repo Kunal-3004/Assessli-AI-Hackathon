@@ -3,9 +3,9 @@
 
 ## 🚀 Project Overview
 
-This project presents the **Assessli Agentic AI Chatbot** which integrates advanced **Retrieval-Augmented Generation (RAG)** techniques to provide accurate, trustworthy, and contextually enriched responses.
+This project presents the **Assessli Agentic AI Chatbot** which integrates advanced **Retrieval-Augmented Generation (RAG)** techniques to provide accurate and contextually enriched responses.
 
-The system enhances traditional RAG pipelines with two powerful mechanisms:
+The system enhances traditional RAG pipelines with two mechanisms:
 - **Adaptive Query Refinement**
 - **Context-Enriched Document Indexing**
 
