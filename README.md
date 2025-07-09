@@ -77,6 +77,15 @@ Preserves context across interactions to ensure coherent, personalized responses
 
 ## 🛠️ Setup Instructions
 
+### ⚙️ **System Requirements – Must Have Installed**
+
+- **Docker**
+- **Android Studio**
+- **Flutter SDK** (with VS Code or Android Studio)
+- **Python (Latest Version)**
+
+---
+
 ### 🔐 API Keys Setup 
 
 - **Groq API Key**:  
