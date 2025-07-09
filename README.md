@@ -153,6 +153,8 @@ docker run -p 5000:5000 Chatbot
 - Seamless exception handling
 
 ---
+## We have released an APK version for your convenience. You can find it under the 'Releases' section on GitHub.
+---
 
 ## 👨‍💻 Team
 
