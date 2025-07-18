@@ -1,15 +1,14 @@
-
 # Assessli Agentic AI Chatbot 🤖
 
 ## 🚀 Project Overview
 
-This project presents the **Assessli Agentic AI Chatbot** which integrates advanced **Retrieval-Augmented Generation (RAG)** techniques to provide accurate and contextually enriched responses.
+This project presents the **Assessli Agentic AI Chatbot**, an advanced conversational assistant that combines **Retrieval-Augmented Generation (RAG)** with adaptive and modular enhancements. The system leverages AI to provide factually accurate, personalized, and context-rich responses in real time.
 
-The system enhances traditional RAG pipelines with two mechanisms:
+Two key innovations elevate its performance:
 - **Adaptive Query Refinement**
 - **Context-Enriched Document Indexing**
 
-These upgrades ensure high-quality results by adapting to the user’s intent and refining both retrieval and generation in a loop until a reliable output is formed.
+Together, these ensure precise document retrieval, deeper understanding, and dynamic generation cycles for higher reliability and relevance.
 
 ---
 
@@ -25,82 +24,107 @@ These upgrades ensure high-quality results by adapting to the user’s intent an
 The interaction starts when the user submits a query through the chatbot interface.
 
 ### 🔹 2. **Chat Memory**
-Preserves context across interactions to ensure coherent, personalized responses.
+Stores session-based context using `ConversationBufferMemory` to enable continuity in dialogue.
 
 ### 🔹 3. **Adaptive Query Refinement**
-- Classifies user query into one of: **factual, analytical, contextual, opinion-based**.
-- Dynamically chooses the best retrieval strategy for that query type.
-- Inspired by: [`Adaptive Retrieval`](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/adaptive_retrieval.ipynb)
+- Classifies queries into: `factual`, `analytical`, `contextual`, or `opinion-based`.
+- Chooses best-fit retrieval methods based on classification.
+- Inspired by [Adaptive Retrieval by Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/adaptive_retrieval.ipynb).
 
 ### 🔹 4. **Context-Enriched Document Indexing**
-- Segments documents into semantic chunks and enriches them with neighboring content.
-- Stores enriched embeddings in a vector database.
-- Inspired by: [`Context Enrichment Window`](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/context_enrichment_window_around_chunk.ipynb)
+- Splits documents into semantically aware chunks and embeds surrounding content.
+- Indexed using enriched vectors for deeper retrieval accuracy.
+- Inspired by [Context Enrichment Window](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/context_enrichment_window_around_chunk.ipynb).
 
 ### 🔹 5. **Enhanced Retrieval Pipeline**
-- Uses the refined query to retrieve ranked results from the vector database.
-- Sends retrieved content and query to the LLM.
+- Uses the refined query to retrieve semantically closest documents from FAISS.
+- Forwards both query and results to the LLM for reasoning.
 
 ### 🔹 6. **Response Grading & Hallucination Filtering**
-- Evaluates LLM response for:
-  - ✅ Query Relevance
-  - ❌ Hallucination
+- Grades the output for:
+  - ✅ Relevance to user query
+  - ❌ Hallucination likelihood
+- Flags uncertain answers for improvement or rewrite.
 
-### 🔹 7. **Query Rewriting Loop (If Necessary)**
-- If the output fails the validation check, the system triggers a **query rewriting loop** and retries.
+### 🔹 7. **Query Rewriting Loop**
+- When output fails validation checks, the system initiates a **query rewrite loop** and re-runs the RAG process.
 
 ### 🔹 8. **Output Delivery or Exception Handling**
-- Delivers validated response to the user.
-- Handles exceptions like incomplete queries or API rate limits with fallback messages.
+- Returns final validated response to the user.
+- Handles edge cases such as empty input, broken documents, or LLM timeouts.
+
+### 🔹 9. **Multimodal Content Processing**
+- Supports PDF, DOCX, CSV, JSON, TXT, Images, Audio, and Video files.
+- Detects file type and extracts structured content using a dedicated multimodal processor.
+- Auto-generates queries or summaries based on file type + user input.
+- Integrates extracted content into the RAG query loop.
+
+### 🔹 10. **n8n Workflow Integration**
+- Asynchronously sends key session data to an **n8n webhook** for logging, analysis, or automation.
+- Includes:
+  - User query and bot response
+  - Sentiment analysis results
+  - Session ID and timestamp
+- Retries on failure with configurable timeout.
+
+---
+
+## 💡 Key Features
+
+✅ Adaptive query classification  
+✅ Context-aware semantic chunking  
+✅ Query rewriting for reliability  
+✅ File upload and multimodal input support  
+✅ Real-time sentiment analysis  
+✅ n8n integration for workflow automation  
+✅ Modular, containerized architecture  
+✅ Chat memory for context continuity
 
 ---
 
 ## 🧰 Tech Stack
 
-| Module           | Tool/Framework                           |
-|------------------|------------------------------------------|
-| **Orchestration**| LangGraph                                |
-| **Vector DB**    | FAISS (Meta)                             |
-| **Containerization** | Docker                               |
-| **LLM Execution**| LLaMA 3.1 via Groq                       |
-| **Web Search**   | DuckDuckGo Search API                    |
-| **Web Scraping** | WebBaseLoader (LangChain)                |
-| **Text Embedding** | Hugging Face Sentence Transformers     |
-| **Tokenizer**    | Hugging Face                             |
-| **Text Cleaning**| LangChain CharacterTextSplitter          |
-| **Chat Memory**  | LangChain ConversationBufferMemory       |
-| **Frontend**     | Flutter (Cross-platform)                 |
-| **Backend**      | Flask (Python)                           |
-| **TTS Engine**   | Deepgram                                 |
+| Module               | Tool/Framework                           |
+|----------------------|------------------------------------------|
+| **Orchestration**    | LangGraph                                |
+| **Vector DB**        | FAISS (Meta)                             |
+| **Containerization** | Docker                                   |
+| **LLM Execution**    | LLaMA 3.1 via Groq                       |
+| **Web Search**       | DuckDuckGo Search API                    |
+| **Web Scraping**     | WebBaseLoader (LangChain)                |
+| **Text Embedding**   | Hugging Face Sentence Transformers       |
+| **Tokenizer**        | Hugging Face                             |
+| **Text Cleaning**    | LangChain CharacterTextSplitter          |
+| **Chat Memory**      | LangChain ConversationBufferMemory       |
+| **Frontend**         | Flutter (Cross-platform)                 |
+| **Backend**          | Flask (Python)                           |
+| **TTS Engine**       | Deepgram                                 |
+| **Multimodal Handling** | Custom processor (`rag_system`)      |
+| **Webhook Automation** | n8n                                     |
 
 ---
 
-## 🛠️ Setup Instructions
+## 📁 Supported File Types
 
-### ⚙️ **System Requirements – Must Have Installed**
-
-- **Docker**
-- **Android Studio**
-- **Flutter SDK** (with VS Code or Android Studio)
-- **Python (Latest Version)**
-
----
-
-### 🔐 API Keys Setup 
-
-- **Groq API Key**:  
-  Get a free key from [https://console.groq.com/keys](https://console.groq.com/keys)  
-
-
-- **Deepgram API Key**:  
-  Get a free key from [https://console.deepgram.com/signup](https://console.deepgram.com/signup)  
-
+| Type     | Formats                                          |
+|----------|--------------------------------------------------|
+| **Text** | PDF, DOCX, TXT, CSV, JSON, XML                   |
+| **Image**| JPG, PNG, GIF, BMP, TIFF                         |
+| **Audio**| MP3, WAV, AAC, FLAC, OGG, WMA                    |
+| **Video**| MP4, AVI, MOV, WMV, FLV, WEBM                    |
 
 ---
 
-### 📱 Flutter Frontend Setup
+## 🔐 API Keys Setup
 
-> 🖥️ Run these commands in your **terminal (bash/cmd)**
+- **Groq API Key**: Get from [https://console.groq.com/keys](https://console.groq.com/keys)  
+- **Deepgram API Key**: Get from [https://console.deepgram.com/signup](https://console.deepgram.com/signup)  
+
+---
+
+## 📱 Flutter Frontend Setup
+
+> 🖥️ Run in your terminal:
 
 ```bash
 # 1. Clone the Repository
@@ -114,48 +138,3 @@ flutter pub get
 
 # 4. Run the Flutter App
 flutter run
-```
-
----
-
-### 🐳 Backend Setup (Flask + Docker)
-
-> 🖥️ Run these commands in your **terminal inside the cloned folder**
-
-```bash
-# 1. Navigate to Backend Code
-cd Chatbot
-
-# 2. Build the Docker Image
-docker build -t Chatbot .
-
-# 3. Run the Docker Container (Exposes port 5000)
-docker run -p 5000:5000 Chatbot
-```
-
-> ✅ After running, the Flask backend should be available at `http://localhost:5000/chat`
-
----
-
-## 📚 References
-
-- [Adaptive Retrieval - Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/adaptive_retrieval.ipynb)  
-- [Context Enrichment Window - Nir Diamant](https://github.com/NirDiamant/RAG_Techniques/blob/main/all_rag_techniques/context_enrichment_window_around_chunk.ipynb)
-
----
-
-## 💡 Key Features
-
-- Modular and scalable architecture  
-- Intelligent query classification and enrichment  
-- Feedback loop for reliability  
-- Real-time query rewriting  
-- Seamless exception handling
-
----
-## We have released an APK version for your convenience. You can find it under the 'Releases' section on GitHub.
----
-
-## 👨‍💻 Team
-
-**Team Tridents** – IIT ISM Dhanbad
