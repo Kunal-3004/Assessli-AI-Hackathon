@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:deepgram_speech_to_text/deepgram_speech_to_text.dart';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final List<Message> _messages = [];
+  final List<String> _files = [];
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
   bool _hasText = false;
@@ -141,19 +143,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _pickImageFromGallery() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  Future<void> _pickFile() async {
+    final pickedFile = await FilePicker.platform.pickFiles();
     if (pickedFile != null) {
       setState(() {
-        _messages.add(
-          Message(
-            imagePath: pickedFile.path,
-            isUser: true,
-            timestamp: DateTime.now(),
-          ),
-        );
+        _files.add(pickedFile.files.single.path!);
       });
-      _scrollToBottom();
     }
   }
 
@@ -264,7 +259,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _pickLocalFile() => _pickImageFromGallery();
+  void _pickLocalFile() => _pickFile();
   void _pickFromOneDrive() => _showNotImplemented("OneDrive");
 
   void _showNotImplemented(String source) {
@@ -532,14 +527,45 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Future<String> _generateResponse(String msg,{bool voice=false}) async {
     try {
       print("Generating response for: '$msg'");
-      final response = await _dio.post(
-        'http://172.22.121.7:5001/chat',
-        data: jsonEncode({'input': msg, 'session_id': sessionId}),
-        options: Options(
+
+      dynamic requestData;
+      Options options;
+
+      if (_files.isNotEmpty) {
+        print('res1');
+        var formData = FormData();
+        formData.fields.add(MapEntry('input', msg));
+        formData.fields.add(MapEntry('session_id', sessionId));
+
+        for (var filePath in _files) {
+          var file = await MultipartFile.fromFile(
+            filePath,
+            filename: filePath.split('/').last,
+          );
+          formData.files.add(MapEntry('file', file));
+        }
+
+        requestData = formData;
+        options = Options(
+          contentType: 'multipart/form-data',
+          responseType: ResponseType.json,
+          receiveTimeout: const Duration(seconds: 60),
+        );
+      } else {
+        print('res2');
+
+        requestData = jsonEncode({'input': msg, 'session_id': sessionId});
+        options = Options(
           contentType: Headers.jsonContentType,
           responseType: ResponseType.json,
           receiveTimeout: const Duration(seconds: 30),
-        ),
+        );
+      }
+
+      final response = await _dio.post(
+          'http://192.168.2.48:5001/chat',
+          data: requestData,
+          options: options
       );
 
       print("Response received: ${response.data}");
@@ -558,6 +584,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       } else if (e.response?.statusCode == 500) {
         return e.response?.data['error'] ?? "Server error occurred";
       }
+      print(e);
       return "Unable to contact the server";
     } catch (e) {
       return "Unexpected error: $e";
@@ -745,6 +772,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   onSendTap: () => _handleSubmitted(_textController.text),
                   onAttachTap: () => _showAttachmentOptions(context),
                   onSubmitted: _handleSubmitted,
+                  files: _files,
+                  onRemoveFile: (index) {
+                    setState(() {
+                      _files.removeAt(index);
+                    });
+                  },
                 ),
               ],
             ),
