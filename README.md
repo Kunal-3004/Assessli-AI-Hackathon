@@ -117,24 +117,62 @@ Stores session-based context using `ConversationBufferMemory` to enable continui
 
 ## 🔐 API Keys Setup
 
+You will need API keys to run the system:
+
 - **Groq API Key**: Get from [https://console.groq.com/keys](https://console.groq.com/keys)  
 - **Deepgram API Key**: Get from [https://console.deepgram.com/signup](https://console.deepgram.com/signup)  
+
+Replace the respective `"YOUR_API_KEY"` placeholders in the `.env` or config files.
 
 ---
 
 ## 📱 Flutter Frontend Setup
 
-> 🖥️ Run in your terminal:
+> 🖥️ Run the following commands in your terminal:
 
 ```bash
-# 1. Clone the Repository
+# Clone the Repository
 git clone https://github.com/Kunal-3004/Assessli-AI-Hackathon.git
 
-# 2. Navigate to Project Directory
+# Navigate to the Flutter App Directory
 cd Assessli-AI-Hackathon
 
-# 3. Install Flutter Dependencies
+# Install Flutter Dependencies
 flutter pub get
 
-# 4. Run the Flutter App
+# Launch the Flutter App
 flutter run
+```
+
+---
+
+## 🖥️ Backend Setup (Flask)
+
+> 🧪 Backend must be set up in a terminal or shell with Docker installed:
+
+```bash
+# Navigate to the backend directory
+cd Assessli-AI-Hackathon/backend
+
+# Build Docker Image
+docker build -t flask-agentic .
+
+# Run Docker Container
+docker run -p 5000:5000 flask-agentic
+```
+
+Make sure the Flask backend is up and running before testing the frontend chatbot.
+
+---
+
+## 🧪 Troubleshooting
+
+- **API Key Not Working?** Double-check if the key is active and in the correct environment variable.
+- **Port Already in Use?** Stop other services running on port 5000 or change port in the Docker run command.
+- **Missing Dependencies?** Run `flutter pub get` again or check `pubspec.yaml`.
+
+---
+
+## 👥 Team Tridents, IIT (ISM) Dhanbad
+
+---
