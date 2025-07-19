@@ -1,0 +1,522 @@
+{
+  "name": "Chatbot Assessli",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5879c0d0-def8-4d81-bbe7-adf19b68eebb",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "8c35de5f-a284-42d9-b76b-52075589a5b1",
+      "name": "Webhook",
+      "webhookId": "5879c0d0-def8-4d81-bbe7-adf19b68eebb"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.sentiment.label }}",
+                    "rightValue": "positive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3a8a9900-dfaf-423a-819c-6e2bedd00c92"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4a5800c1-ba6c-45d5-a3a3-1389fd6ce6fe",
+                    "leftValue": "={{ $json.sentiment.label }}",
+                    "rightValue": "negative",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a4ef53c8-2df6-450f-960d-e961e4cd7fe7",
+                    "leftValue": "={{ $json.sentiment.label }}",
+                    "rightValue": "neutral",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "7968c5c5-41b9-409c-afbb-55db5ae0dd44",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "pos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Question": "={{ $json.question }}",
+            "Response": "={{ $json.response }}",
+            "Sentiment": "={{ $json.sentiment.label }} - {{ $json.sentiment.score }}",
+            "Session Trend": "={{ $json.session_trend.label }} - {{ $json.session_trend.score }}",
+            "Timestamp": "={{ $json.timestamp }}",
+            "Session ID": "={{ $json.session_id }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Response",
+              "displayName": "Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session Trend",
+              "displayName": "Session Trend",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        704,
+        -208
+      ],
+      "id": "d99b5f3c-ec8f-4833-936c-94076a3349d5",
+      "name": "Positive",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bqL4hJRr881SUoFb",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2126814102,
+          "mode": "list",
+          "cachedResultName": "neg",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit#gid=2126814102"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Question": "={{ $json.question }}",
+            "Response": "={{ $json.response }}",
+            "Sentiment": "={{ $json.sentiment.label }} - {{ $json.sentiment.score }}",
+            "Session Trend": "={{ $json.session_trend.label }} - {{ $json.session_trend.score }}",
+            "Timestamp": "={{ $json.timestamp }}",
+            "Session ID": "={{ $json.session_id }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Response",
+              "displayName": "Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session Trend",
+              "displayName": "Session Trend",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        720,
+        16
+      ],
+      "id": "a93865f1-f78e-4f4c-88c3-59106a50574d",
+      "name": "Negative",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bqL4hJRr881SUoFb",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 659334454,
+          "mode": "list",
+          "cachedResultName": "neu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1c6EMaOztrnpOetY_HAT6aCNbdl8Ys90g7-ytaq0TWdo/edit#gid=659334454"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Question": "={{ $json.question }}",
+            "Response": "={{ $json.response }}",
+            "Sentiment": "={{ $json.sentiment.label }} - {{ $json.sentiment.score }}",
+            "Session Trend": "={{ $json.session_trend.label }} - {{ $json.session_trend.score }}",
+            "Timestamp": "={{ $json.timestamp }}",
+            "Session ID": "={{ $json.session_id }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Response",
+              "displayName": "Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session Trend",
+              "displayName": "Session Trend",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        720,
+        240
+      ],
+      "id": "5e89e069-b471-48d4-b937-98994301b1a1",
+      "name": "Neutral",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bqL4hJRr881SUoFb",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "question": "What services does Assessli provide?",
+          "response": "Assessli provides comprehensive assessment solutions including skills evaluation, competency mapping, and talent analytics services. Our platform helps organizations make data-driven hiring and development decisions.",
+          "sentiment": {
+            "label": "positive",
+            "score": 0.92
+          },
+          "session_trend": {
+            "label": "positive",
+            "score": 0.85
+          },
+          "timestamp": "2023-11-16T14:32:45.123Z",
+          "session_id": "session_abc123"
+        }
+      }
+    ],
+    "Switch": [
+      {
+        "json": {
+          "question": "What services does Assessli provide?",
+          "response": "Assessli provides comprehensive assessment solutions including skills evaluation, competency mapping, and talent analytics services. Our platform helps organizations make data-driven hiring and development decisions.",
+          "sentiment": {
+            "label": "positive",
+            "score": 0.92
+          },
+          "session_trend": {
+            "label": "positive",
+            "score": 0.85
+          },
+          "timestamp": "2023-11-16T14:32:45.123Z",
+          "session_id": "session_abc123"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Positive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Negative",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Neutral",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Positive": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fb2a5d25-f912-4c34-abda-522634f93288",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "abba10f55ed2e66ccd6ea92c7e5d3dd4691803b6f340e61f3cf7d59373cbd717"
+  },
+  "id": "35DcFygC99TcBuUh",
+  "tags": []
+}
