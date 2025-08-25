@@ -146,7 +146,7 @@ flutter run
 
 ---
 
-## 🖥️ Backend Setup (Flask)
+## 🖥️ Backend Setup (FastAPI)
 
 > 🧪 Backend must be set up in a terminal or shell with Docker installed:
 
@@ -155,10 +155,10 @@ flutter run
 cd Assessli-AI-Hackathon/backend
 
 # Build Docker Image
-docker build -t flask-agentic .
+docker build -t fastapi-agentic .
 
 # Run Docker Container
-docker run -p 5000:5000 flask-agentic
+docker run -p 8000:8000 fastapi-agentic
 ```
 
 Make sure the Flask backend is up and running before testing the frontend chatbot.
