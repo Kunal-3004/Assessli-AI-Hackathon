@@ -97,7 +97,7 @@ Stores session-based context using `ConversationBufferMemory` to enable continui
 | **Text Cleaning**    | LangChain CharacterTextSplitter          |
 | **Chat Memory**      | LangChain ConversationBufferMemory       |
 | **Frontend**         | Flutter (Cross-platform)                 |
-| **Backend**          | Flask (Python)                           |
+| **Backend**          | FastAPI (Python)                           |
 | **TTS Engine**       | Deepgram                                 |
 | **Multimodal Handling** | Custom processor (`rag_system`)      |
 | **Webhook Automation** | n8n                                     |
