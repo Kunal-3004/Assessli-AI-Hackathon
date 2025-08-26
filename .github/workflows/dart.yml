@@ -24,5 +24,6 @@ jobs:
         channel: stable
         flutter-version: 3.19.0
     - run: flutter --version
+    - run: flutter build apk --release --split-per-abi
 
     
